@@ -22,8 +22,198 @@ index 7c3c620..6b6cb31 100644
  		level.putInt("xPos", xPos);
  		level.putInt("zPos", zPos);
  		level.putLong("LastUpdate", lastUpdate);
+diff --git a/src/main/java/net/querz/nbt/tag/ByteArrayTag.java b/src/main/java/net/querz/nbt/tag/ByteArrayTag.java
+index 8fbcf8a..e80f9d3 100644
+--- a/src/main/java/net/querz/nbt/tag/ByteArrayTag.java
++++ b/src/main/java/net/querz/nbt/tag/ByteArrayTag.java
+@@ -20,6 +20,9 @@ public class ByteArrayTag extends ArrayTag<byte[]> implements Comparable<ByteArr
+ 		return ID;
+ 	}
+ 
++	@Override
++	public void checkDepth(int maxDepth) {}
++
+ 	@Override
+ 	public boolean equals(Object other) {
+ 		return super.equals(other) && Arrays.equals(getValue(), ((ByteArrayTag) other).getValue());
+diff --git a/src/main/java/net/querz/nbt/tag/ByteTag.java b/src/main/java/net/querz/nbt/tag/ByteTag.java
+index 207cefd..4df0a48 100644
+--- a/src/main/java/net/querz/nbt/tag/ByteTag.java
++++ b/src/main/java/net/querz/nbt/tag/ByteTag.java
+@@ -22,6 +22,9 @@ public class ByteTag extends NumberTag<Byte> implements Comparable<ByteTag> {
+ 		return ID;
+ 	}
+ 
++	@Override
++	public void checkDepth(int maxDepth) {}
++
+ 	public boolean asBoolean() {
+ 		return getValue() > 0;
+ 	}
+diff --git a/src/main/java/net/querz/nbt/tag/CompoundTag.java b/src/main/java/net/querz/nbt/tag/CompoundTag.java
+index f34db87..850b3fe 100644
+--- a/src/main/java/net/querz/nbt/tag/CompoundTag.java
++++ b/src/main/java/net/querz/nbt/tag/CompoundTag.java
+@@ -265,6 +265,13 @@ public class CompoundTag extends Tag<Map<String, Tag<?>>>
+ 		return sb.toString();
+ 	}
+ 
++	@Override
++	public void checkDepth(int maxDepth) {
++		for (Map.Entry<String, Tag<?>> e : getValue().entrySet()) {
++			e.getValue().checkDepth(decrementMaxDepth(maxDepth));
++		}
++	}
++
+ 	@Override
+ 	public boolean equals(Object other) {
+ 		if (this == other) {
+diff --git a/src/main/java/net/querz/nbt/tag/DoubleTag.java b/src/main/java/net/querz/nbt/tag/DoubleTag.java
+index 28d0865..9da1866 100644
+--- a/src/main/java/net/querz/nbt/tag/DoubleTag.java
++++ b/src/main/java/net/querz/nbt/tag/DoubleTag.java
+@@ -18,6 +18,9 @@ public class DoubleTag extends NumberTag<Double> implements Comparable<DoubleTag
+ 		return ID;
+ 	}
+ 
++	@Override
++	public void checkDepth(int maxDepth) {}
++
+ 	public void setValue(double value) {
+ 		super.setValue(value);
+ 	}
+diff --git a/src/main/java/net/querz/nbt/tag/EndTag.java b/src/main/java/net/querz/nbt/tag/EndTag.java
+index 30b970b..ee22585 100644
+--- a/src/main/java/net/querz/nbt/tag/EndTag.java
++++ b/src/main/java/net/querz/nbt/tag/EndTag.java
+@@ -24,6 +24,9 @@ public final class EndTag extends Tag<Void> {
+ 		return "\"end\"";
+ 	}
+ 
++	@Override
++	public void checkDepth(int maxDepth) {}
++
+ 	@Override
+ 	public EndTag clone() {
+ 		return INSTANCE;
+diff --git a/src/main/java/net/querz/nbt/tag/FloatTag.java b/src/main/java/net/querz/nbt/tag/FloatTag.java
+index 9d79204..599aa87 100644
+--- a/src/main/java/net/querz/nbt/tag/FloatTag.java
++++ b/src/main/java/net/querz/nbt/tag/FloatTag.java
+@@ -18,6 +18,9 @@ public class FloatTag extends NumberTag<Float> implements Comparable<FloatTag> {
+ 		return ID;
+ 	}
+ 
++	@Override
++	public void checkDepth(int maxDepth) {}
++
+ 	public void setValue(float value) {
+ 		super.setValue(value);
+ 	}
+diff --git a/src/main/java/net/querz/nbt/tag/IntArrayTag.java b/src/main/java/net/querz/nbt/tag/IntArrayTag.java
+index 1799c93..fd5418b 100644
+--- a/src/main/java/net/querz/nbt/tag/IntArrayTag.java
++++ b/src/main/java/net/querz/nbt/tag/IntArrayTag.java
+@@ -20,6 +20,9 @@ public class IntArrayTag extends ArrayTag<int[]> implements Comparable<IntArrayT
+ 		return ID;
+ 	}
+ 
++	@Override
++	public void checkDepth(int maxDepth) {}
++
+ 	@Override
+ 	public boolean equals(Object other) {
+ 		return super.equals(other) && Arrays.equals(getValue(), ((IntArrayTag) other).getValue());
+diff --git a/src/main/java/net/querz/nbt/tag/IntTag.java b/src/main/java/net/querz/nbt/tag/IntTag.java
+index 57c1f2b..b318cf1 100644
+--- a/src/main/java/net/querz/nbt/tag/IntTag.java
++++ b/src/main/java/net/querz/nbt/tag/IntTag.java
+@@ -18,6 +18,9 @@ public class IntTag extends NumberTag<Integer> implements Comparable<IntTag> {
+ 		return ID;
+ 	}
+ 
++	@Override
++	public void checkDepth(int maxDepth) {}
++
+ 	public void setValue(int value) {
+ 		super.setValue(value);
+ 	}
+diff --git a/src/main/java/net/querz/nbt/tag/ListTag.java b/src/main/java/net/querz/nbt/tag/ListTag.java
+index 955ad1a..b90b748 100644
+--- a/src/main/java/net/querz/nbt/tag/ListTag.java
++++ b/src/main/java/net/querz/nbt/tag/ListTag.java
+@@ -290,6 +290,13 @@ public class ListTag<T extends Tag<?>> extends Tag<List<T>> implements Iterable<
+ 		return sb.toString();
+ 	}
+ 
++	@Override
++	public void checkDepth(int maxDepth) {
++		for (int i = 0; i < size(); i++) {
++			get(i).checkDepth(decrementMaxDepth(maxDepth));
++		}
++	}
++
+ 	@Override
+ 	public boolean equals(Object other) {
+ 		if (this == other) {
+diff --git a/src/main/java/net/querz/nbt/tag/LongArrayTag.java b/src/main/java/net/querz/nbt/tag/LongArrayTag.java
+index e0528dd..8b5794a 100644
+--- a/src/main/java/net/querz/nbt/tag/LongArrayTag.java
++++ b/src/main/java/net/querz/nbt/tag/LongArrayTag.java
+@@ -20,6 +20,9 @@ public class LongArrayTag extends ArrayTag<long[]> implements Comparable<LongArr
+ 		return ID;
+ 	}
+ 
++	@Override
++	public void checkDepth(int maxDepth) {}
++
+ 	@Override
+ 	public boolean equals(Object other) {
+ 		return super.equals(other) && Arrays.equals(getValue(), ((LongArrayTag) other).getValue());
+diff --git a/src/main/java/net/querz/nbt/tag/LongTag.java b/src/main/java/net/querz/nbt/tag/LongTag.java
+index 8f40a32..32a19ce 100644
+--- a/src/main/java/net/querz/nbt/tag/LongTag.java
++++ b/src/main/java/net/querz/nbt/tag/LongTag.java
+@@ -18,6 +18,9 @@ public class LongTag extends NumberTag<Long> implements Comparable<LongTag> {
+ 		return ID;
+ 	}
+ 
++	@Override
++	public void checkDepth(int maxDepth) {}
++
+ 	public void setValue(long value) {
+ 		super.setValue(value);
+ 	}
+diff --git a/src/main/java/net/querz/nbt/tag/ShortTag.java b/src/main/java/net/querz/nbt/tag/ShortTag.java
+index 5f434c3..b5e7a81 100644
+--- a/src/main/java/net/querz/nbt/tag/ShortTag.java
++++ b/src/main/java/net/querz/nbt/tag/ShortTag.java
+@@ -18,6 +18,9 @@ public class ShortTag extends NumberTag<Short> implements Comparable<ShortTag> {
+ 		return ID;
+ 	}
+ 
++	@Override
++	public void checkDepth(int maxDepth) {}
++
+ 	public void setValue(short value) {
+ 		super.setValue(value);
+ 	}
+diff --git a/src/main/java/net/querz/nbt/tag/StringTag.java b/src/main/java/net/querz/nbt/tag/StringTag.java
+index 0d30c4b..8e566ed 100644
+--- a/src/main/java/net/querz/nbt/tag/StringTag.java
++++ b/src/main/java/net/querz/nbt/tag/StringTag.java
+@@ -33,6 +33,9 @@ public class StringTag extends Tag<String> implements Comparable<StringTag> {
+ 		return escapeString(getValue(), false);
+ 	}
+ 
++	@Override
++	public void checkDepth(int maxDepth) {}
++
+ 	@Override
+ 	public boolean equals(Object other) {
+ 		return super.equals(other) && getValue().equals(((StringTag) other).getValue());
 diff --git a/src/main/java/net/querz/nbt/tag/Tag.java b/src/main/java/net/querz/nbt/tag/Tag.java
-index dd1c8d5..5547e80 100644
+index dd1c8d5..dc4aeca 100644
 --- a/src/main/java/net/querz/nbt/tag/Tag.java
 +++ b/src/main/java/net/querz/nbt/tag/Tag.java
 @@ -37,7 +37,7 @@ public abstract class Tag<T> implements Cloneable {
@@ -35,3 +225,13 @@ index dd1c8d5..5547e80 100644
  
  	private static final Map<String, String> ESCAPE_CHARACTERS;
  	static {
+@@ -133,6 +133,9 @@ public abstract class Tag<T> implements Cloneable {
+ 	 * */
+ 	public abstract String valueToString(int maxDepth);
+ 
++	public void checkDepth() {}
++	public abstract void checkDepth(int maxDepth);
++
+ 	/**
+ 	 * Returns whether this Tag and some other Tag are equal.
+ 	 * They are equal if {@code other} is not {@code null} and they are of the same class.
